@@ -193,7 +193,7 @@
 
     const cost     = qty * buyEff;
     const proceeds = qty * sellEff;
-    const pnl      = proceeds - cost;
+    const pnl      = (proceeds - cost)*26000;
     const roi      = (pnl / cost) * 100;
 
     // Breakeven sell price considering fees: sell * (1 - fee) = buy * (1 + fee) => sell = buy*(1+fee)/(1-fee)
