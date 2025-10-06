@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Crypto P/L Calculator – 2 Tabs</title>
+  <style>
+    :root{
+      --bg:#0f172a;          /* slate-900 */
+      --panel:#111827;       /* gray-900 */
+      --muted:#6b7280;       /* gray-500 */
+      --text:#e5e7eb;        /* gray-200 */
+      --accent:#22d3ee;      /* cyan-400 */
+      --accent-2:#38bdf8;    /* sky-400 */
+      --danger:#f43f5e;      /* rose-500 */
+      --success:#22c55e;     /* green-500 */
+      --ring: 0 0 0 3px color-mix(in srgb, var(--accent) 40%, transparent);
+    }
+    *{box-sizing:border-box}
+    body{margin:0; font-family:system-ui, -apple-system, Segoe UI, Roboto, Ubuntu, Cantarell, Noto Sans, sans-serif; background:linear-gradient(135deg, #0b1220, #0f172a 40%, #0b1220); color:var(--text)}
+    .container{max-width:900px;margin:auto;padding:28px}
+    header{display:flex;align-items:center;justify-content:space-between;margin-bottom:18px}
+    h1{font-size:clamp(20px,2.8vw,28px);margin:0;letter-spacing:.3px}
+    .card{background:linear-gradient(180deg, rgba(255,255,255,.06), rgba(255,255,255,.02)); border:1px solid rgba(255,255,255,.08); border-radius:16px; box-shadow:0 10px 30px rgba(0,0,0,.35); overflow:hidden}
+    .tabs{display:flex; gap:6px; background:rgba(255,255,255,.03); padding:6px; position:sticky; top:0}
+    .tab-btn{flex:1; border:1px solid rgba(255,255,255,.08); background:#0b1220; color:var(--text); padding:12px 14px; border-radius:10px; font-weight:600; cursor:pointer; transition:.2s transform, .2s background, .2s color, .2s border}
+    .tab-btn[aria-selected="true"]{background:linear-gradient(180deg, rgba(34,211,238,.18), rgba(56,189,248,.16)); border-color: color-mix(in srgb, var(--accent) 30%, transparent); outline: none}
+    .tab-btn:hover{transform:translateY(-1px)}
+    .content{padding:18px}
+    .grid{display:grid; gap:14px; grid-template-columns:repeat(12,1fr)}
+    .col-6{grid-column:span 6}
+    .col-12{grid-column:span 12}
+    @media (max-width:820px){.col-6{grid-column:span 12}}
+    label{display:block; font-size:.95rem; color:var(--muted); margin:4px 2px 6px}
+    .field{display:flex;align-items:center; gap:10px; background:rgba(255,255,255,.04); border:1px solid rgba(255,255,255,.08); padding:10px 12px; border-radius:12px}
+    .field:focus-within{box-shadow:var(--ring); border-color: color-mix(in srgb, var(--accent) 40%, transparent)}
+    .field input{flex:1; min-width:0; background:transparent; border:none; outline:none; color:var(--text); font-size:1.05rem}
+    .suffix{color:var(--muted); font-size:.95rem}
+    .row{display:flex; gap:12px; flex-wrap:wrap}
+    .btn{border:1px solid rgba(255,255,255,.08); background:#0b1220; color:var(--text); padding:10px 14px; border-radius:10px; font-weight:600; cursor:pointer}
+    .btn:hover{border-color: color-mix(in srgb, var(--accent) 30%, transparent)}
+    .btn.primary{background:linear-gradient(90deg, color-mix(in srgb, var(--accent) 35%, #0b1220), color-mix(in srgb, var(--accent-2) 35%, #0b1220))}
+    .muted{color:var(--muted)}
+    .result{display:grid; gap:10px; background:rgba(255,255,255,.03); border:1px dashed rgba(255,255,255,.18); padding:14px; border-radius:12px}
+    .kpi{display:flex; align-items:center; justify-content:space-between; padding:12px 14px; border-radius:12px; background:rgba(255,255,255,.04)}
+    .kpi .v{font-weight:800; font-size:1.15rem}
+    .kpi.good{outline:1px solid color-mix(in srgb, var(--success) 35%, transparent)}
+    .kpi.bad{outline:1px solid color-mix(in srgb, var(--danger) 35%, transparent)}
+    footer{margin-top:14px;color:var(--muted);font-size:.9rem}
+    .note{font-size:.9rem;color:var(--muted)}
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <h1>🧮 Crypto P/L Mini Calculator</h1>
+      <div class="muted">Đơn giản • Không lưu dữ liệu</div>
+    </header>
+
+    <div class="card" role="tablist" aria-label="Crypto calculators">
+      <div class="tabs">
+        <button class="tab-btn" id="tab-pl" role="tab" aria-selected="true" aria-controls="panel-pl">Tab 1 · Lời/Lỗ</button>
+        <button class="tab-btn" id="tab-qty" role="tab" aria-selected="false" aria-controls="panel-qty">Tab 2 · Dự kiến số coin</button>
+      </div>
+
+      <section id="panel-pl" role="tabpanel" tabindex="0" class="content">
+        <div class="grid">
+          <div class="col-6">
+            <label for="pl-qty">Tổng số coin</label>
+            <div class="field"><input id="pl-qty" type="number" inputmode="decimal" min="0" step="any" placeholder="VD: 1.234" /><span class="suffix">coin</span></div>
+          </div>
+          <div class="col-6">
+            <label for="pl-buy">Giá mua</label>
+            <div class="field"><input id="pl-buy" type="number" inputmode="decimal" min="0" step="any" placeholder="VD: 62000" /><span class="suffix">đơn vị/coin</span></div>
+          </div>
+          <div class="col-6">
+            <label for="pl-sell">Giá bán</label>
+            <div class="field"><input id="pl-sell" type="number" inputmode="decimal" min="0" step="any" placeholder="VD: 65500" /><span class="suffix">đơn vị/coin</span></div>
+          </div>
+          <div class="col-6">
+            <label for="pl-fee">Phí (tùy chọn)</label>
+            <div class="field"><input id="pl-fee" type="number" inputmode="decimal" min="0" step="any" placeholder="0.1" /><span class="suffix">% / mỗi chiều</span></div>
+          </div>
+          <div class="col-12 row" style="margin-top:6px">
+            <button class="btn" id="pl-reset" type="button">Reset</button>
+            <span class="note">Phí (nếu nhập) sẽ trừ cả khi mua và khi bán.</span>
+          </div>
+          <div class="col-12">
+            <div class="result" id="pl-result">
+              <div class="kpi" id="kpi-pnl"><span>Lời/Lỗ</span><span class="v" data-kpi="pnl">—</span></div>
+              <div class="kpi" id="kpi-roi"><span>Tỷ suất (ROI)</span><span class="v" data-kpi="roi">—</span></div>
+              <div class="kpi"><span>Tổng vốn (sau phí)</span><span class="v" data-kpi="cost">—</span></div>
+              <div class="kpi"><span>Giá trị bán (sau phí)</span><span class="v" data-kpi="proceeds">—</span></div>
+              <div class="kpi"><span>Giá hòa vốn</span><span class="v" data-kpi="breakeven">—</span></div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section id="panel-qty" role="tabpanel" tabindex="0" hidden class="content">
+        <div class="grid">
+          <div class="col-6">
+            <label for="q-money">Số tiền hiện tại</label>
+            <div class="field"><input id="q-money" type="number" inputmode="decimal" min="0" step="any" placeholder="VD: 1000" /><span class="suffix">đơn vị tiền</span></div>
+          </div>
+          <div class="col-6">
+            <label for="q-price">Giá mua</label>
+            <div class="field"><input id="q-price" type="number" inputmode="decimal" min="0" step="any" placeholder="VD: 65000" /><span class="suffix">đơn vị/coin</span></div>
+          </div>
+          <div class="col-6">
+            <label for="q-fee">Phí (tùy chọn)</label>
+            <div class="field"><input id="q-fee" type="number" inputmode="decimal" min="0" step="any" placeholder="0" /><span class="suffix">% / mua</span></div>
+          </div>
+          <div class="col-12 row" style="margin-top:6px">
+            <button class="btn" id="q-reset" type="button">Reset</button>
+          </div>
+          <div class="col-12">
+            <div class="result" id="q-result">
+              <div class="kpi"><span>Số coin ước tính</span><span class="v" data-kpi="coins">—</span></div>
+              <div class="kpi"><span>Giá thực trả/coin (sau phí)</span><span class="v" data-kpi="effprice">—</span></div>
+            </div>
+          </div>
+        </div>
+      </section>
+    </div>
+
+    <footer>
+      <p>⚠️ Đây là công cụ minh họa. Không phải tư vấn tài chính. Hãy kiểm tra lại số liệu trước khi đặt lệnh.</p>
+    </footer>
+  </div>
+
+<script>
+(function(){
+  const fmt = new Intl.NumberFormat('vi-VN', {maximumFractionDigits: 8});
+  const fmt2 = new Intl.NumberFormat('vi-VN', {maximumFractionDigits: 2});
+
+  // Tabs
+  const tabPL = document.getElementById('tab-pl');
+  const tabQ  = document.getElementById('tab-qty');
+  const panelPL = document.getElementById('panel-pl');
+  const panelQ  = document.getElementById('panel-qty');
+  function activate(which){
+    const isPL = which === 'pl';
+    tabPL.setAttribute('aria-selected', isPL);
+    tabQ.setAttribute('aria-selected', !isPL);
+    panelPL.hidden = !isPL; panelQ.hidden = isPL;
+    (isPL ? panelPL : panelQ).focus();
+  }
+  tabPL.addEventListener('click', ()=>activate('pl'));
+  tabQ.addEventListener('click',  ()=>activate('qty'));
+
+  // --- Tab 1: P/L ---
+  const $ = id => document.getElementById(id);
+  const inpQty  = $('pl-qty');
+  const inpBuy  = $('pl-buy');
+  const inpSell = $('pl-sell');
+  const inpFee  = $('pl-fee');
+  const out = {
+    pnl: document.querySelector('[data-kpi="pnl"]'),
+    roi: document.querySelector('[data-kpi="roi"]'),
+    cost: document.querySelector('[data-kpi="cost"]'),
+    proceeds: document.querySelector('[data-kpi="proceeds"]'),
+    breakeven: document.querySelector('[data-kpi="breakeven"]')
+  };
+  const kpiPNL = document.getElementById('kpi-pnl');
+  const kpiROI = document.getElementById('kpi-roi');
+
+  function num(val){
+    const n = Number(val);
+    return Number.isFinite(n) ? n : 0;
+  }
+  function sanitize(){
+    [inpQty, inpBuy, inpSell, inpFee].forEach(el=>{
+      if(el.value && Number(el.value) < 0) el.value = '';
+    })
+  }
+  function computePL(){
+    sanitize();
+    const qty = num(inpQty.value);
+    const buy = num(inpBuy.value);
+    const sell= num(inpSell.value);
+    const fee = num(inpFee.value) / 100; // percent per side
+
+    if(qty <= 0 || buy <= 0 || sell <= 0){
+      out.pnl.textContent = out.roi.textContent = out.cost.textContent = out.proceeds.textContent = out.breakeven.textContent = '—';
+      kpiPNL.classList.remove('good','bad');
+      kpiROI.classList.remove('good','bad');
+      return;
+    }
+
+    const buyEff  = buy * (1 + fee);      // price after buy fee
+    const sellEff = sell * (1 - fee);     // price after sell fee
+
+    const cost     = qty * buyEff;
+    const proceeds = qty * sellEff;
+    const pnl      = proceeds - cost;
+    const roi      = (pnl / cost) * 100;
+
+    // Breakeven sell price considering fees: sell * (1 - fee) = buy * (1 + fee) => sell = buy*(1+fee)/(1-fee)
+    const breakeven = buy * (1 + fee) / (1 - fee);
+
+    out.cost.textContent = fmt2.format(cost);
+    out.proceeds.textContent = fmt2.format(proceeds);
+    out.pnl.textContent = (pnl >= 0 ? '+' : '') + fmt2.format(pnl);
+    out.roi.textContent = (roi >= 0 ? '+' : '') + fmt2.format(roi) + '%';
+    out.breakeven.textContent = fmt2.format(breakeven);
+
+    kpiPNL.classList.toggle('good', pnl > 0);
+    kpiPNL.classList.toggle('bad', pnl < 0);
+    kpiROI.classList.toggle('good', roi > 0);
+    kpiROI.classList.toggle('bad', roi < 0);
+  }
+
+  [inpQty, inpBuy, inpSell, inpFee].forEach(el=> el.addEventListener('input', computePL));
+  $('pl-reset').addEventListener('click', ()=>{
+    inpQty.value = inpBuy.value = inpSell.value = inpFee.value = '';
+    computePL();
+  });
+
+  // --- Tab 2: Quantity ---
+  const qMoney = $('q-money');
+  const qPrice = $('q-price');
+  const qFee   = $('q-fee');
+  const qOut = {
+    coins: document.querySelector('[data-kpi="coins"]'),
+    effprice: document.querySelector('[data-kpi="effprice"]')
+  };
+
+  function computeQty(){
+    [qMoney, qPrice, qFee].forEach(el=>{ if(el.value && Number(el.value) < 0) el.value=''; });
+    const money = num(qMoney.value);
+    const price = num(qPrice.value);
+    const fee   = num(qFee.value) / 100; // buy fee only
+
+    if(money <= 0 || price <= 0){
+      qOut.coins.textContent = qOut.effprice.textContent = '—';
+      return;
+    }
+    const effPrice = price * (1 + fee);
+    const coins = money / effPrice; // allow fractional coins
+
+    qOut.coins.textContent = fmt.format(coins);
+    qOut.effprice.textContent = fmt2.format(effPrice);
+  }
+
+  [qMoney, qPrice, qFee].forEach(el=> el.addEventListener('input', computeQty));
+  $('q-reset').addEventListener('click', ()=>{ qMoney.value = qPrice.value = qFee.value = ''; computeQty(); });
+
+  // Init
+  computePL();
+  computeQty();
+})();
+</script>
+</body>
+</html>
